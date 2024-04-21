@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>3D Risk-Reward Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #plot-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #plot-canvas {
+            max-width: 100%;
+            height: 600px; /* Increased height */
+        }
+    </style>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+<h1>3D Risk-Reward Visualization</h1>
+<form>
+    <label for="risk">Risk (e.g., 10% of losing $1000):</label>
+    <input type="text" id="risk" name="risk" pattern="^(\d+(\.\d+)?%?\s*of\s*losing\s*\$\d+(\.\d+)?)" title="Enter a value in the format 'x% of losing $y'" required>
+
+    <label for="reward">Reward (e.g., 80% of winning $1000):</label>
+    <input type="text" id="reward" name="reward" pattern="^(\d+(\.\d+)?%?\s*of\s*winning\s*\$\d+(\.\d+)?)" title="Enter a value in the format 'x% of winning $y'" required>
+
+    <label for="complexity">Complexity (e.g., 100 man hour):</label>
+    <input type="text" id="complexity" name="complexity" pattern="^(\d+)\s*man\s*hour(s)?$" title="Enter a value in the format 'x man hour' or 'x man hours'" required>
+
+    <button type="submit">Generate Plot</button>
+</form>
+
+<div id="plot-container">
+    <div id="plot-canvas"></div>
+</div>
+
+<script>
+    let dataPoints = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const plotCanvas = document.getElementById('plot-canvas');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const risk = parseRiskReward(document.getElementById('risk').value);
+            const reward = parseRiskReward(document.getElementById('reward').value);
+            const complexity = parseComplexity(document.getElementById('complexity').value);
+
+            if (risk && reward && complexity) {
+                const opportunityIndex = dataPoints.length;
+                dataPoints.push({
+                    x: [risk],
+                    y: [reward],
+                    z: [complexity],
+                    mode: 'markers',
+                    marker: {
+                        size: 10,
+                        color: 'red'
+                    },
+                    type: 'scatter3d',
+                    name: `Business Opportunity ${opportunityIndex + 1}`
+                });
+
+                generatePlot();
+            }
+        });
+
+        function parseRiskReward(str) {
+            const match = str.match(/^(\d+(\.\d+)?%?)\s*of\s*(losing|winning)\s*\$(\d+(\.\d+)?)/);
+            if (match) {
+                const percentage = parseFloat(match[1].replace('%', '')) / 100;
+                const amount = parseFloat(match[4]);
+                return percentage * amount;
+            }
+            return null;
+        }
+
+        function parseComplexity(str) {
+            const match = str.match(/^(\d+)\s*man\s*hour(s)?$/);
+            if (match) {
+                return parseInt(match[1]);
+            }
+            return null;
+        }
+
+        function generatePlot() {
+            const layout = {
+                title: '3D Risk-Reward Plot',
+                scene: {
+                    xaxis: { title: 'Risk ($)' },
+                    yaxis: { title: 'Reward ($)' },
+                    zaxis: { title: 'Complexity (man hour)' }
+                },
+                height: 800 // Increased height
+            };
+
+            Plotly.newPlot('plot-canvas', dataPoints, layout);
+        }
+    });
+</script>
+</body>
+</html>
