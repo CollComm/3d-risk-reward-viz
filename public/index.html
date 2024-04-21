@@ -84,11 +84,13 @@
                     x: [risk],
                     y: [reward],
                     z: [complexity],
-                    mode: 'markers',
+                    mode: 'markers+text',
                     marker: {
                         size: 10,
                         color: 'red'
                     },
+                    text: [`Risk: $${risk.toFixed(2)}<br>Reward: $${reward.toFixed(2)}<br>Complexity: ${complexity} man hour(s)`], // Added text labels
+                    textposition: 'top center', // Position of the text labels
                     type: 'scatter3d',
                     name: `Business Opportunity ${opportunityIndex + 1}`
                 });
